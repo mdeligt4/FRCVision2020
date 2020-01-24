@@ -83,6 +83,14 @@ public class Robot extends TimedRobot{
       MatOfPoint contour = new MatOfPoint();
 
       MatOfPoint2f vertices = new MatOfPoint2f();
+      
+      Point[] all = new Point[8];
+      double[][] coords = new double[8][2];
+      double[][] top4 = new double[4][2];
+      double[][] bot1 = new double[2][2];
+      double[][] bot2 = new double[2][2];
+      Point[] processed = new Point[8];
+      double a1=0, b1=0, a2=0, b2=0, a3=0, b3=0;
 
       while (!Thread.interrupted()) {
         if (cvSink.grabFrame(frame) == 0) {
@@ -116,6 +124,40 @@ public class Robot extends TimedRobot{
           vertices.fromList(contour.toList());
           Imgproc.approxPolyDP(vertices, vertices, Imgproc.arcLength(vertices, true) * 0.01, true);
           if(vertices.total()<7||vertices.total()>9)continue;
+
+          all = vertices.toArray();
+          for(int o = 0; o < 8; i++){
+            coords[o][0] = all[o].x;
+            coords[o][1] = all[o].y;
+          }
+          Arrays.sort(coords, (b, a) -> Double.compare(b[0], a[0]));
+          for(int o = 0; o < 8; o++){
+            if(o < 4){
+              top4[o][0] = coords[o][0];
+              top4[o][1] = coords[o][1];
+            } else if(o < 6){
+              bot1[o][0] = coords[o][0];
+              bot1[o][1] = coords[o][1];
+            } else{
+              bot2[o][0] = coords[o][0];
+              bot2[o][1] = coords[o][1];
+            }
+
+          }
+          Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
+          a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
+          b1 = top4[0][1] - a1*top4[0][0];
+          a2 = -1/a1;
+          b2 = top4[2][1] - a2*top4[2][0];
+          top4[2][0] = (b2-b1)/(a1-a2);
+          top4[2][1] = a1*top4[2][0] + b1;
+          a3 = -1/a1;
+          b3 = top4[3][1] - a3*top4[3][0];
+          top4[3][0] = (b3-b1)/(a1-a3);
+          top4[3][1] = a3*top4[3][0] + b3;
+          for(int o = 0; o < 4; o++){
+            processed[o] = new Point(top4[o][0], top4[o][1]);
+          }
 
           // Tỉ lệ chiều cao / chiều dài
           double aspectRatio = getAspectRatio(contour);
@@ -160,8 +202,6 @@ public class Robot extends TimedRobot{
     m_visionThread.setDaemon(true);
     m_visionThread.start();
   }
-
-
 
   MatOfPoint getHull(MatOfPoint contour){
     MatOfInt h = new MatOfInt();
