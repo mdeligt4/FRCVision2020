@@ -35,22 +35,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import static frc.robot.Functions.*;
 import static frc.robot.Const.*;
 
-/**
- * This is a demo program showing the use of OpenCV to do vision processing. The
- * image is acquired from the USB camera, then a rectangle is put on the image
- * and sent to the dashboard. OpenCV has many methods for different types of
- * processing.
- */
-
 public class Robot extends TimedRobot{
   Thread m_visionThread;
 
   @Override
   public void robotInit() {
-    
-    // VideoProperty chingchong = ImageSource.createProperty("minSolid", VideoProperty.Kind.kInteger, 14,18,1, 16,16);
-    // ImageSource
-    // CameraServerJNI.createSourceProperty(0, "fuck you this is a boolean", VideoProperty.Kind.kBoolean.getValue(), 0, 1, 1, 0, 0);
 
     m_visionThread = new Thread(() -> {
       UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
@@ -73,7 +62,8 @@ public class Robot extends TimedRobot{
       double[][] bot1 = new double[2][2];
       double[][] bot2 = new double[2][2];
       Point[] processed = new Point[8];
-      double a1=0, b1=0, a2=0, b2=0, a3=0, b3=0;
+      double a1=0, b1=0, a2=0, b2=0, a3=0, b3=0, a4=0, b4=0, a5=0, b5=0;
+      double bb1=0, bb2;
 
       while (!Thread.interrupted()) {
         if (cvSink.grabFrame(frame) == 0) {
@@ -103,29 +93,25 @@ public class Robot extends TimedRobot{
         // Tìm cái phản quang
         vertices = findTarget(inputContours);
 
-        // fewfijeofwef2ufo2fo1o2u1f
-        // 2oiwj1o3fj2qo
-        // COPY VAO DAY OK
         {
           all = vertices.toArray();
           for(int o = 0; o < 8; o++){
             coords[o][0] = all[o].x;
             coords[o][1] = all[o].y;
           }
-          Arrays.sort(coords, (a, b) -> Double.compare(a[0], b[0]));
+          Arrays.sort(coords, (b, a) -> Double.compare(b[0], a[0]));
           for(int o = 0; o < 8; o++){
             if(o < 4){
               top4[o][0] = coords[o][0];
               top4[o][1] = coords[o][1];
-            }else if(o < 6){
-              bot1[o-4][0] = coords[o][0];
-              bot1[o-4][1] = coords[o][1];
-            }else{
-              bot2[o-6][0] = coords[o][0];
-              bot2[o-6][1] = coords[o][1];
+            } else if(o < 6){
+              bot1[o][0] = coords[o][0];
+              bot1[o][1] = coords[o][1];
+            } else{
+              bot2[o][0] = coords[o][0];
+              bot2[o][1] = coords[o][1];
             }
           }
-
           Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
           a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
           b1 = top4[0][1] - a1*top4[0][0];
@@ -139,6 +125,24 @@ public class Robot extends TimedRobot{
           top4[3][1] = a3*top4[3][0] + b3;
           for(int o = 0; o < 4; o++){
             processed[o] = new Point(top4[o][0], top4[o][1]);
+          }
+          bb1 = bot1[0][1] - a1*bot1[0][0];
+          a4 = -1/a1;
+          b4 = bot1[1][1] - a4*bot1[1][0];
+          bot1[1][0] = (b4-bb1)/(a1-a4);
+          bot1[1][1] = a4*bot1[1][0] + b4;
+          processed[4] = new Point(bot1[0][0], bot1[0][1]);
+          processed[5] = new Point(bot1[1][0], bot1[1][1]);
+          bb2 = bot2[0][1] - a1*bot2[0][0];
+          a5 = -1/a1;
+          b5 = bot2[1][1] - a5*bot2[1][0];
+          bot2[1][0] = (b5-bb2)/(a1-a5);
+          bot2[1][1] = a5*bot2[1][0] + b5;
+          processed[7] = new Point(bot2[0][0], bot2[0][1]);
+          processed[8] = new Point(bot2[1][0], bot2[1][1]);
+          //.
+          //continue here continue here continue here continue here continue here continue here continue here continue here continue here
+          //.
           }
         }
         
@@ -155,12 +159,12 @@ public class Robot extends TimedRobot{
         fuckyou.add(passoagresso);
         Imgproc.polylines(frame, fuckyou, true, iwanttodie);
 
-        // ỉa Mat đã xử lý lên stream vl
+        // out Mat đã xử lý lên stream vl
         outputStream2.putFrame(frame);  
 
         // Xóa các cái contour cũ
         inputContours.clear();
-      }
+
     });
     m_visionThread.setDaemon(true);
     m_visionThread.start();
