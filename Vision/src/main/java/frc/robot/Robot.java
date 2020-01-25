@@ -103,42 +103,44 @@ public class Robot extends TimedRobot{
         // Tìm cái phản quang
         vertices = findTarget(inputContours);
 
-        // Lưu các tọa độ các đỉnh vào mảng
-        all = vertices.toArray();
-        for(int o = 0; o < 8; o++){
-          coords[o][0] = all[o].x;
-          coords[o][1] = all[o].y;
-        }
-        Arrays.sort(coords, (a, b) -> Double.compare(a[0], b[0]));
-        for(int o = 0; o < 8; o++){
-          if(o < 4){
-            top4[o][0] = coords[o][0];
-            top4[o][1] = coords[o][1];
-          }else if(o < 6){
-            bot1[o-4][0] = coords[o][0];
-            bot1[o-4][1] = coords[o][1];
-          }else{
-            bot2[o-6][0] = coords[o][0];
-            bot2[o-6][1] = coords[o][1];
+        // fewfijeofwef2ufo2fo1o2u1f
+        // 2oiwj1o3fj2qo
+        // COPY VAO DAY OK
+        {
+          all = vertices.toArray();
+          for(int o = 0; o < 8; o++){
+            coords[o][0] = all[o].x;
+            coords[o][1] = all[o].y;
+          }
+          Arrays.sort(coords, (a, b) -> Double.compare(a[0], b[0]));
+          for(int o = 0; o < 8; o++){
+            if(o < 4){
+              top4[o][0] = coords[o][0];
+              top4[o][1] = coords[o][1];
+            }else if(o < 6){
+              bot1[o-4][0] = coords[o][0];
+              bot1[o-4][1] = coords[o][1];
+            }else{
+              bot2[o-6][0] = coords[o][0];
+              bot2[o-6][1] = coords[o][1];
+            }
+          }
+
+          Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
+          a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
+          b1 = top4[0][1] - a1*top4[0][0];
+          a2 = -1/a1;
+          b2 = top4[2][1] - a2*top4[2][0];
+          top4[2][0] = (b2-b1)/(a1-a2);
+          top4[2][1] = a1*top4[2][0] + b1;
+          a3 = -1/a1;
+          b3 = top4[3][1] - a3*top4[3][0];
+          top4[3][0] = (b3-b1)/(a1-a3);
+          top4[3][1] = a3*top4[3][0] + b3;
+          for(int o = 0; o < 4; o++){
+            processed[o] = new Point(top4[o][0], top4[o][1]);
           }
         }
-
-        // Chỉnh mấy cái đỉnh 4\
-        Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
-        a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
-        b1 = top4[0][1] - a1*top4[0][0];
-        a2 = -1/a1;
-        b2 = top4[2][1] - a2*top4[2][0];
-        top4[2][0] = (b2-b1)/(a1-a2);
-        top4[2][1] = a1*top4[2][0] + b1;
-        a3 = -1/a1;
-        b3 = top4[3][1] - a3*top4[3][0];
-        top4[3][0] = (b3-b1)/(a1-a3);
-        top4[3][1] = a3*top4[3][0] + b3;
-        for(int o = 0; o < 4; o++){
-          processed[o] = new Point(top4[o][0], top4[o][1]);
-        }
-
         
         // !!!
         // CHỌN CHỈ 1 TRONG 2 CÁI DƯỚI
