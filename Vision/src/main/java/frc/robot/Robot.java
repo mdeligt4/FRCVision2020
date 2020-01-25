@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.source.tree.Tree.Kind;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -33,6 +32,9 @@ import edu.wpi.cscore.VideoProperty;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 
+import static frc.robot.Functions.*;
+import static frc.robot.Const.*;
+
 /**
  * This is a demo program showing the use of OpenCV to do vision processing. The
  * image is acquired from the USB camera, then a rectangle is put on the image
@@ -45,23 +47,7 @@ public class Robot extends TimedRobot{
 
   @Override
   public void robotInit() {
-    // double H = 61/2, tH = 20;
-    // double S = 11.8*2.55, tS = 15;
-    // double V = 92.5*2.55, tV = 15;
-    // Scalar lowerb = new Scalar(H-tH,S-tS,V-tV);
-    // Scalar upperb = new Scalar(H+tH,S+tS,V+tV);
-    double lH = 50 / 2;
-    double lS = 30 * 2.55;
-    double lV = 25 * 2.55;
-    double hH = 110 / 2;
-    double hS = 70 * 2.55;
-    double hV = 70 * 2.55;
-    Scalar lowerb = new Scalar(lH, lS, lV);
-    Scalar upperb = new Scalar(hH, hS, hV);
-    Scalar iwanttodie = new Scalar(255, 255, 255);
-    double minSolidity = 0.15, maxSolidity = 0.2;
-    double minAspectRatio = 0.020, maxAspectRatio = 0.028;
-
+    
     // VideoProperty chingchong = ImageSource.createProperty("minSolid", VideoProperty.Kind.kInteger, 14,18,1, 16,16);
     // ImageSource
     // CameraServerJNI.createSourceProperty(0, "fuck you this is a boolean", VideoProperty.Kind.kBoolean.getValue(), 0, 1, 1, 0, 0);
@@ -79,9 +65,6 @@ public class Robot extends TimedRobot{
       Mat frame = new Mat();
       Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(9, 9));
       List<MatOfPoint> inputContours = new ArrayList<MatOfPoint>();
-      List<MatOfPoint> outputContours = new ArrayList<MatOfPoint>();
-      MatOfPoint contour = new MatOfPoint();
-
       MatOfPoint2f vertices = new MatOfPoint2f();
       
       Point[] all = new Point[8];
@@ -108,74 +91,54 @@ public class Robot extends TimedRobot{
         Imgproc.findContours(frame, inputContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
         // Reset lại cái frame để vẽ vào sau
-        Core.inRange(frame, new Scalar(1, 1, 1), new Scalar(0, 0, 0), frame);
-
-        // Imgproc.convexHull(contours.get(0), hulls.get(0));
-
-        Imgproc.drawContours(frame, inputContours, -1, new Scalar(255, 255, 255));
-        // Imgproc.drawContours(frame, hulls, 0, new Scalar(255,255,255));
-
-        // ImageSource.createProperty();
+        frame = new Mat(frame.rows(), frame.cols(), CvType.CV_8U, Scalar.all(0));
         
-        for(int i=0;i<inputContours.size();i++){
-          contour = inputContours.get(i);
-
-          // Xử lí các đỉnh
-          vertices.fromList(contour.toList());
-          Imgproc.approxPolyDP(vertices, vertices, Imgproc.arcLength(vertices, true) * 0.01, true);
-          if(vertices.total()<7||vertices.total()>9)continue;
-
-          all = vertices.toArray();
-          for(int o = 0; o < 8; i++){
-            coords[o][0] = all[o].x;
-            coords[o][1] = all[o].y;
-          }
-          Arrays.sort(coords, (b, a) -> Double.compare(b[0], a[0]));
-          for(int o = 0; o < 8; o++){
-            if(o < 4){
-              top4[o][0] = coords[o][0];
-              top4[o][1] = coords[o][1];
-            } else if(o < 6){
-              bot1[o][0] = coords[o][0];
-              bot1[o][1] = coords[o][1];
-            } else{
-              bot2[o][0] = coords[o][0];
-              bot2[o][1] = coords[o][1];
-            }
-
-          }
-          Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
-          a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
-          b1 = top4[0][1] - a1*top4[0][0];
-          a2 = -1/a1;
-          b2 = top4[2][1] - a2*top4[2][0];
-          top4[2][0] = (b2-b1)/(a1-a2);
-          top4[2][1] = a1*top4[2][0] + b1;
-          a3 = -1/a1;
-          b3 = top4[3][1] - a3*top4[3][0];
-          top4[3][0] = (b3-b1)/(a1-a3);
-          top4[3][1] = a3*top4[3][0] + b3;
-          for(int o = 0; o < 4; o++){
-            processed[o] = new Point(top4[o][0], top4[o][1]);
-          }
-
-          // Tỉ lệ chiều cao / chiều dài
-          double aspectRatio = getAspectRatio(contour);
-          System.out.print(Imgproc.contourArea(contour) + " " +  aspectRatio + " ");
-
-          // Tỉ lệ diện tích contour / convex hull
-          double solidity = getSolidity(contour);
-          System.out.println(solidity);
-
-          if(solidity<minSolidity||solidity>maxSolidity)continue;
-          if(aspectRatio<minAspectRatio||aspectRatio>maxAspectRatio)continue;
-
-          outputContours.add(contour);
-        }
-
+        // Xem input trong stream Rectangle
+        Imgproc.drawContours(frame, inputContours, -1, new Scalar(255, 255, 255));
         outputStream.putFrame(frame);
 
-        Core.inRange(frame, new Scalar(1, 1, 1), new Scalar(0, 0, 0), frame);
+        // Reset tiếp
+        frame = new Mat(frame.rows(), frame.cols(), CvType.CV_8U, Scalar.all(0));
+
+        // Tìm cái phản quang
+        vertices = findTarget(inputContours);
+
+        // Lưu các tọa độ các đỉnh vào mảng
+        all = vertices.toArray();
+        for(int o = 0; o < 8; o++){
+          coords[o][0] = all[o].x;
+          coords[o][1] = all[o].y;
+        }
+        Arrays.sort(coords, (a, b) -> Double.compare(a[0], b[0]));
+        for(int o = 0; o < 8; o++){
+          if(o < 4){
+            top4[o][0] = coords[o][0];
+            top4[o][1] = coords[o][1];
+          }else if(o < 6){
+            bot1[o-4][0] = coords[o][0];
+            bot1[o-4][1] = coords[o][1];
+          }else{
+            bot2[o-6][0] = coords[o][0];
+            bot2[o-6][1] = coords[o][1];
+          }
+        }
+
+        // Chỉnh mấy cái đỉnh 4\
+        Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
+        a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
+        b1 = top4[0][1] - a1*top4[0][0];
+        a2 = -1/a1;
+        b2 = top4[2][1] - a2*top4[2][0];
+        top4[2][0] = (b2-b1)/(a1-a2);
+        top4[2][1] = a1*top4[2][0] + b1;
+        a3 = -1/a1;
+        b3 = top4[3][1] - a3*top4[3][0];
+        top4[3][0] = (b3-b1)/(a1-a3);
+        top4[3][1] = a3*top4[3][0] + b3;
+        for(int o = 0; o < 4; o++){
+          processed[o] = new Point(top4[o][0], top4[o][1]);
+        }
+
         
         // !!!
         // CHỌN CHỈ 1 TRONG 2 CÁI DƯỚI
@@ -185,8 +148,8 @@ public class Robot extends TimedRobot{
         // Imgproc.drawContours(frame, outputContours, -69420, new Scalar(255, 255, 255));
         
         // 2) nối các đỉnh/góc của contour
-        MatOfPoint passoagresso = new MatOfPoint(vertices.toArray());
-        List<MatOfPoint> fuckyou = new ArrayList();
+        MatOfPoint passoagresso = new MatOfPoint(processed);
+        List<MatOfPoint> fuckyou = new ArrayList<MatOfPoint>();
         fuckyou.add(passoagresso);
         Imgproc.polylines(frame, fuckyou, true, iwanttodie);
 
@@ -195,42 +158,10 @@ public class Robot extends TimedRobot{
 
         // Xóa các cái contour cũ
         inputContours.clear();
-        outputContours.clear();
-        
       }
     });
     m_visionThread.setDaemon(true);
     m_visionThread.start();
   }
 
-  MatOfPoint getHull(MatOfPoint contour){
-    MatOfInt h = new MatOfInt();
-    MatOfPoint hull = new MatOfPoint();
-    Imgproc.convexHull(contour, h);
-    hull.create((int)h.size().height,1,CvType.CV_32SC2);
-    for(int j=0;j<h.size().height;j++){
-      int index = (int) h.get(j,0)[0];
-      double[] point = new double[]{contour.get(index,0)[0],contour.get(index,0)[1]};
-      hull.put(j,0,point);
-    }
-    return hull;
-  }
-
-  double getSolidity(MatOfPoint contour){
-    double hull = Imgproc.contourArea(getHull(contour));
-    if(hull==0)return -1;
-    return Imgproc.contourArea(contour)/hull;
-  }
-
-  double getAspectRatio(MatOfPoint contour){
-    double sum = Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true)/2;
-    double product = Imgproc.contourArea(contour);
-    double x,y;
-    double delta = Math.pow(sum, 2)-4*product;
-    if(delta<0)return -1;
-    x=(sum-Math.sqrt(delta))/2;
-    y=(sum+Math.sqrt(delta))/2;
-    if(y==0)return -1;
-    return x/y;
-  }
 }
