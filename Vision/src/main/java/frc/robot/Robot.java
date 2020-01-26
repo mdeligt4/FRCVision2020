@@ -11,11 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -23,12 +21,9 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import edu.wpi.cscore.CameraServerJNI;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
-import edu.wpi.cscore.ImageSource;
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.VideoProperty;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 
@@ -93,7 +88,8 @@ public class Robot extends TimedRobot{
         // Tìm cái phản quang
         vertices = findTarget(inputContours);
 
-
+        // Xử lý cố định điểm
+        // Phân tách tọa độ 8 điểm tìm được ra array 2D
         all = vertices.toArray();
         for(int o = 0; o < 8; o++){
           coords[o][0] = all[o].x;
@@ -112,7 +108,9 @@ public class Robot extends TimedRobot{
             bot2[o-6][1] = coords[o][1];
           }
         }
+        // Sắp xếp các cặp tọa độ theo chiều Y tăng dần
         Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
+        // Xử lý 4 điểm trên cùng
         a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
         b1 = top4[0][1] - a1*top4[0][0];
         a2 = -1/a1;
@@ -123,34 +121,34 @@ public class Robot extends TimedRobot{
         b3 = top4[3][1] - a3*top4[3][0];
         top4[3][0] = (b3-b1)/(a1-a3);
         top4[3][1] = a3*top4[3][0] + b3;
+        // Output 4 điểm trên cùng (đã xử lý) ra array Point
         for(int o = 0; o < 4; o++){
           processed[o] = new Point(top4[o][0], top4[o][1]);
         }
+        // Xử lý 4 điểm còn lại
         bb1 = bot1[0][1] - a1*bot1[0][0];
         a4 = -1/a1;
         b4 = bot1[1][1] - a4*bot1[1][0];
         bot1[1][0] = (b4-bb1)/(a1-a4);
         bot1[1][1] = a4*bot1[1][0] + b4;
-        processed[4] = new Point(bot1[0][0], bot1[0][1]);
-        processed[5] = new Point(bot1[1][0], bot1[1][1]);
         bb2 = bot2[0][1] - a1*bot2[0][0];
         a5 = -1/a1;
         b5 = bot2[1][1] - a5*bot2[1][0];
         bot2[1][0] = (b5-bb2)/(a1-a5);
         bot2[1][1] = a5*bot2[1][0] + b5;
+        // Output 4 điểm còn lại (đã xử lý) ra array Point
+        processed[4] = new Point(bot1[0][0], bot1[0][1]);
+        processed[5] = new Point(bot1[1][0], bot1[1][1]);
         processed[7] = new Point(bot2[0][0], bot2[0][1]);
         processed[8] = new Point(bot2[1][0], bot2[1][1]);
-        //.
-        //continue here continue here continue here continue here continue here continue here continue here continue here continue here
-        //.
-        }
-        
+
+      }
         
         // Nối 8 đỉnh đã xử lí
-        MatOfPoint passoagresso = new MatOfPoint(processed);
-        List<MatOfPoint> fuckyou = new ArrayList<MatOfPoint>();
-        fuckyou.add(passoagresso);
-        Imgproc.polylines(frame, fuckyou, true, iwanttodie);
+        MatOfPoint processedMat = new MatOfPoint(processed);
+        List<MatOfPoint> processedList = new ArrayList<MatOfPoint>();
+        processedList.add(processedMat);
+        Imgproc.polylines(frame, processedList, true, white);
 
         // out Mat đã xử lý lên stream vl
         outputStream2.putFrame(frame);  
