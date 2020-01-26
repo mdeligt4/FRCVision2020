@@ -95,7 +95,8 @@ public class Robot extends TimedRobot{
           coords[o][0] = all[o].x;
           coords[o][1] = all[o].y;
         }
-        Arrays.sort(coords, (a, b) -> Double.compare(b[0], a[0]));
+        // Sắp xếp các cặp tọa độ theo chiều Y tăng dần
+        Arrays.sort(coords, (a, b) -> Double.compare(a[1], b[1]));
         for(int o = 0; o < 8; o++){
           if(o < 4){
             top4[o][0] = coords[o][0];
@@ -108,7 +109,7 @@ public class Robot extends TimedRobot{
             bot2[o-6][1] = coords[o][1];
           }
         }
-        // Sắp xếp các cặp tọa độ theo chiều Y tăng dần
+        // Sắp xếp các cặp tọa độ theo chiều X tăng dần
         Arrays.sort(top4, (a, b) -> Double.compare(a[0], b[0]));
         // Xử lý 4 điểm trên cùng
         a1 = top4[0][1] - top4[0][0] / top4[1][1] - top4[1][0];
