@@ -49,12 +49,13 @@ public class Robot extends TimedRobot{
       CvSink cvSink = CameraServer.getInstance().getVideo();
       CvSource outputStream = CameraServer.getInstance().putVideo("Rectangle", 640, 480);
       CvSource outputStream2 = CameraServer.getInstance().putVideo("vl", 640, 480);
+      CvSource outputStream3 = CameraServer.getInstance().putVideo("duma", 640, 480);
 
       Mat frame = new Mat();
       Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(9, 9));
       List<MatOfPoint> inputContours = new ArrayList<MatOfPoint>();
       MatOfPoint2f vertices = new MatOfPoint2f();
-      
+      Mat tmpMat = new Mat();
 
       Point[] all = new Point[8];
       double[][] coords = new double[8][2];
@@ -70,6 +71,7 @@ public class Robot extends TimedRobot{
           continue;
         }
 
+        tmpMat = frame.clone();
         // Tìm ra các thứ màu xanh (bao gồm cái phản quang)
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2HSV);
         Core.inRange(frame, lowerb, upperb, frame);
@@ -125,11 +127,20 @@ public class Robot extends TimedRobot{
             Imgproc.circle(frame, new Point(topR[0],topR[1]), 6, new Scalar(255,0,0));
             Imgproc.circle(frame, new Point(botL[0],botL[1]), 6, new Scalar(255,0,0));
             Imgproc.circle(frame, new Point(botR[0],botR[1]), 6, new Scalar(255,0,0));
+            Imgproc.circle(frame, new Point((topL[0]+topR[0])/2,(topL[1]+topR[1])/2), 6, new Scalar(255,0,0));
 
-            System.out.println("top left: "+ Arrays.toString(topL));
-            System.out.println("top right: "+ Arrays.toString(topR));
-            System.out.println("bot left: "+ Arrays.toString(botL));
-            System.out.println("bot right: "+ Arrays.toString(botR));
+            for(int i=1;i<6;i++){
+              Imgproc.circle(tmpMat, new Point(topL[0],topL[1]), i, new Scalar(0,0,255));
+              Imgproc.circle(tmpMat, new Point(topR[0],topR[1]), i, new Scalar(0,0,255));
+              Imgproc.circle(tmpMat, new Point(botL[0],botL[1]), i, new Scalar(0,0,255));
+              Imgproc.circle(tmpMat, new Point(botR[0],botR[1]), i, new Scalar(0,0,255));
+              Imgproc.circle(tmpMat, new Point((topL[0]+topR[0])/2,(topL[1]+topR[1])/2), i, new Scalar(0,0,255));
+            }
+
+            // System.out.println("top left: "+ Arrays.toString(topL));
+            // System.out.println("top right: "+ Arrays.toString(topR));
+            // System.out.println("bot left: "+ Arrays.toString(botL));
+            // System.out.println("bot right: "+ Arrays.toString(botR));
             
             CameraSolver sol = new CameraSolver(new Coordinates3D(-8.66, -15, 0), new Coordinates3D(8.66, -15, 0),
                   new Coordinates3D(-17.32, 0, 0), new Coordinates3D(17.32, 0, 0));
@@ -141,10 +152,11 @@ public class Robot extends TimedRobot{
             List<MatOfPoint> processedList = new ArrayList<MatOfPoint>();
             processedList.add(processedMat);
             Imgproc.polylines(frame, processedList, true, white);
-          }catch(Exception e){}
-        }
+          }catch(Exception e){System.out.println("Runtime Error");}
+        }else System.out.println("Target not found");
         // // out Mat đã xử lý lên stream vl
         outputStream2.putFrame(frame);
+        outputStream3.putFrame(tmpMat);
 
 
         // Xóa các cái contour cũ
