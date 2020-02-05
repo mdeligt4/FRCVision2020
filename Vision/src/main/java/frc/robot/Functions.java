@@ -58,6 +58,9 @@ public class Functions {
       if(vertices.total()!=8)continue;
 
 
+
+      
+
       // // Tỉ lệ chiều cao / chiều dài
       // double aspectRatio = getAspectRatio(contour);
       // System.out.print(Imgproc.contourArea(contour) + " " +  aspectRatio + " ");
