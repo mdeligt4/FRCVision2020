@@ -28,7 +28,7 @@ public class Functions {
     if(hull==0)return -1;
     return Imgproc.contourArea(contour)/hull;
   }
-
+ 
   public static double getAspectRatio(MatOfPoint contour){
     double sum = Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true)/2;
     double product = Imgproc.contourArea(contour);
@@ -45,7 +45,7 @@ public class Functions {
     MatOfPoint contour;
     MatOfPoint2f vertices = new MatOfPoint2f();
     double maxArea=-1;
-    MatOfPoint2f result=new MatOfPoint2f();
+    MatOfPoint2f result=null;
     for(int i=0;i<contours.size();i++){
       contour = contours.get(i);
 
@@ -60,15 +60,14 @@ public class Functions {
 
       // Tỉ lệ chiều cao / chiều dài
       double aspectRatio = getAspectRatio(contour);
-      System.out.print(Imgproc.contourArea(contour) + " " +  aspectRatio + " ");
+      // System.out.print(Imgproc.contourArea(contour) + " " +  aspectRatio + " ");
 
       // Tỉ lệ diện tích contour / convex hull
       double solidity = getSolidity(contour);
-      System.out.println(solidity);
+      // System.out.println(solidity);
 
       if(solidity<minSolidity||solidity>maxSolidity)continue;
       if(aspectRatio<minAspectRatio||aspectRatio>maxAspectRatio)continue;
-
       maxArea=Imgproc.contourArea(contour);
       result = vertices;
     }
