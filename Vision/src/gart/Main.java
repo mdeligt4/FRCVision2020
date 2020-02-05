@@ -13,8 +13,13 @@ public class Main {
 		CameraSolver sol = new CameraSolver(new Coordinates3D(-8.66, -15, 0), new Coordinates3D(8.66, -15, 0),
 				new Coordinates3D(-17.32, 0, 0), new Coordinates3D(17.32, 0, 0));
 
+<<<<<<< HEAD
+		sol.solve(new Coordinates2D(-25.01, 172.28), new Coordinates2D(-17.81, 196.54),
+				new Coordinates2D(-65.04, 156.34), new Coordinates2D(-47.47, 204.4));
+=======
 		sol.solve(new Coordinates2D[] { new Coordinates2D(-25.01, 172.28), new Coordinates2D(-17.81, 196.54),
 				new Coordinates2D(-65.04, 156.34), new Coordinates2D(-47.47, 204.4) });
+>>>>>>> 31fb0245ac88c14166dbea69aca05539899fd761
 
 //		CameraSolver sol = new CameraSolver(new Coordinates3D(-9.81, -17, 0), new Coordinates3D(9.81, -17, 0),
 //				new Coordinates3D(-19.63, 0, 0), new Coordinates3D(19.63, 0, 0));

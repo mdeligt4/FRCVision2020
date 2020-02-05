@@ -54,20 +54,21 @@ public class Functions {
 
       // Phải có 8 đỉnh
       vertices.fromList(contour.toList());
-      Imgproc.approxPolyDP(vertices, vertices, Imgproc.arcLength(vertices, true) * 0.01, true);
+      Imgproc.approxPolyDP(vertices, vertices, Imgproc.arcLength(vertices, true) * 0.005, true);
       if(vertices.total()!=8)continue;
 
 
-      // Tỉ lệ chiều cao / chiều dài
-      double aspectRatio = getAspectRatio(contour);
+      // // Tỉ lệ chiều cao / chiều dài
+      // double aspectRatio = getAspectRatio(contour);
       // System.out.print(Imgproc.contourArea(contour) + " " +  aspectRatio + " ");
 
-      // Tỉ lệ diện tích contour / convex hull
-      double solidity = getSolidity(contour);
+      // // Tỉ lệ diện tích contour / convex hull
+      // double solidity = getSolidity(contour);
       // System.out.println(solidity);
 
-      if(solidity<minSolidity||solidity>maxSolidity)continue;
-      if(aspectRatio<minAspectRatio||aspectRatio>maxAspectRatio)continue;
+      // if(solidity<minSolidity||solidity>maxSolidity)continue;
+      // if(aspectRatio<minAspectRatio||aspectRatio>maxAspectRatio)continue;
+
       maxArea=Imgproc.contourArea(contour);
       result = vertices;
     }
